@@ -8,7 +8,7 @@
 
 I built Flashcard Quizzer, a command-line application that loads flashcards from a JSON deck and quizzes the user in sequential, random or adaptive mode. It validates decks, gives coloured feedback, supports early exit, and ends with a summary table. Extras: a history file that lets adaptive mode remember weak cards across sessions, JSON and CSV export, `--limit`, `--seed` and `--stats`.
 
-I used Claude Code as an orchestrating session that delegated bounded tasks (implementation, tests, documentation) to worker agents. The AI wrote all of the code. The briefs, the review and the verification runs were done in that orchestrating session under my direction; I set the goals and approved each design decision.
+I used Claude Code, which delegated bounded tasks (implementation, tests, documentation) to worker agents. The AI wrote all of the code. I set the goals, the requirements and the quality gates, and I decided what to accept, change or reject.
 
 ## Project Overview
 
@@ -29,12 +29,12 @@ The application uses only the Python standard library (3.10+). `quiz_engine.py` 
 ## AI Collaboration Experience
 
 ### AI Tools Used
-- [x] Claude (Claude Code, orchestrating worker agents)
+- [x] Claude (Claude Code, with worker agents for bounded tasks)
 - [ ] GitHub Copilot, ChatGPT, other (not used)
 
 ### Collaboration Workflow
 1. **Requests.** Each brief stated the goal, modules, explicit error cases, quality gates, read-only paths, and what to report. Tasks were set-up, core and extras, tests, and documentation.
-2. **Review and validation.** Every output was checked against the review checklist categories (correctness, quality, security, performance, robustness, integration, testability, maintainability). I did not accept worker summaries: I re-ran pytest and all linters, compared protected files with the originals using `cmp`, and injected mutants.
+2. **Review and validation.** Every output was checked against the review checklist categories (correctness, quality, security, performance, robustness, integration, testability, maintainability). I did not accept worker summaries at face value: I had pytest and all linters re-run, the protected files compared with the originals using `cmp`, and mutants injected.
 3. **Refinement.** Decisions that changed the code went back to a worker as precise instructions.
 
 ### Most Valuable AI Interactions
@@ -43,11 +43,11 @@ The application uses only the Python standard library (3.10+). `quiz_engine.py` 
 **Context:** I needed the application core in one task.
 **AI Prompt:** A structured brief: modules, error cases, quality gates, extras, "report ambiguities".
 **AI Response:** Seven modules of about 1,300 lines, two new decks, clean tool output, and three flagged ambiguities (meaning of `--stats`, accuracy counting, the history update rule).
-**Your Changes:** I accepted the ambiguity choices. The worker had also run `isort .` and silently reordered imports in four scripts under `.claude/commands/`. I spotted this in its report, confirmed it with `cmp`, restored the files byte for byte, and excluded those paths in `pyproject.toml`.
+**Your Changes:** I accepted the ambiguity choices. The worker had also run `isort .` and silently reordered imports in four scripts under `.claude/commands/`. The worker's own report disclosed it. I confirmed it with `cmp`, restored the files byte for byte, and excluded those paths in `pyproject.toml`.
 **Outcome:** A working application, and a rule: name read-only paths.
 
 #### Example 2: An edge case no default test would find
-**Context:** Reading `ui.py`, I saw that any input equal to `exit` quit the quiz, so a card with the answer `exit` could never be answered.
+**Context:** The review of `ui.py` showed that any input equal to `exit` quit the quiz, so a card with the answer `exit` could never be answered.
 **AI Prompt:** The test brief stated the rule: quit only if the input is an exit word and differs from the card's expected answer, with tests for both behaviours.
 **AI Response:** The fix in `QuizUI.ask`. To prove the tests bite, the worker removed the second condition; five tests failed; it restored the code.
 **Your Changes:** None beyond the specification.
@@ -72,7 +72,7 @@ The AI handled happy paths well but missed an unusual input, bound a default arg
 - [x] Error handling (one exception type per layer)
 
 ### Testing Strategy
-There are 270 tests in seven files: unit tests per module, parametrised edge cases, and integration tests that run whole sessions through `main()` with scripted input, using only `tmp_path`, `monkeypatch` and `capsys`. Line coverage is 100%. Ctrl+C and end-of-input handling are tested with simulated `KeyboardInterrupt` and `EOFError`. Because coverage counts executed lines, not assertions, I also injected two bugs into `quiz_engine.py` (an inverted adaptive re-queue condition, a removed `casefold()`); both were caught. The tests were written after the code.
+There are 270 tests in seven files: unit tests per module, parametrised edge cases, and integration tests that run whole sessions through `main()` with scripted input, using only `tmp_path`, `monkeypatch` and `capsys`. Line coverage is 100%. Ctrl+C and end-of-input handling are tested with simulated `KeyboardInterrupt` and `EOFError`. I also played a full adaptive session in Windows Terminal with `--stats`: green and red feedback rendered correctly, the missed card returned after three other questions, and the summary showed 9 questions and 88.9% accuracy. Because coverage counts executed lines, not assertions, I also injected two bugs into `quiz_engine.py` (an inverted adaptive re-queue condition, a removed `casefold()`); both were caught. The tests were written after the code.
 
 ### Design Patterns Used
 - **Strategy:** `QuizMode` and its three subclasses decide the next card; `QuizSession` does not know which one it holds.
@@ -125,7 +125,7 @@ Precise briefs and honest failure reports let me decide quickly, and verificatio
 ### What Could Be Improved
 - State read-only paths and escalation rules in the first brief.
 - Request an edge-case self-review before tests are written.
-- Windows colours were only logic-tested, not checked in an interactive terminal, and Ctrl+C was verified with simulated interrupts, not by pressing the keys.
+- Ctrl+C and `exit` were verified with simulated interrupts, not by pressing the keys in a terminal.
 - A `LimitedMode` decorator would shrink the Strategy interface.
 
 ### Future Enhancements

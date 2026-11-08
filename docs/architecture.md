@@ -262,6 +262,6 @@ printing.
   `utils/exporter.py` import `SessionStats` / `AnswerRecord` from
   `quiz_engine`, so the "utils" package is not independent of the domain.
   Moving the statistics dataclasses into their own module would remove this.
-- **Colours not checked in a real terminal.** Windows console colours are only
-  logic-tested (colour codes are emitted when colours are enabled); they were
-  not checked in an interactive Windows terminal.
+- **Ctrl+C not pressed in a real terminal.** Interrupt and end-of-input handling
+  are covered by unit tests with simulated `KeyboardInterrupt` and `EOFError`.
+  Colours were checked by hand in Windows Terminal.

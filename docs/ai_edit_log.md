@@ -5,7 +5,7 @@
 **Project:** Flashcard Quizzer  
 **Author:** Fabio Sabatini  
 **Date:** 2026-11-07  
-**AI tool:** Claude Code (an orchestrating session that delegated bounded tasks to worker agents)
+**AI tool:** Claude Code, which delegated bounded tasks to worker agents under my direction
 
 ## How to Use This Log
 
@@ -30,15 +30,15 @@ For each AI interaction, create a new entry with the following structure:
 Every AI output was reviewed against the categories of
 `ai_guidance/code_review_checklist.md`: correctness, code quality, security,
 performance, error handling and robustness, integration and compatibility,
-testability, and maintainability. The review was not left to the worker's own
-report. The orchestrating session re-verified results independently:
+testability, and maintainability. I did not rely on the worker's own report;
+I had the results re-verified independently:
 
-- re-running pytest, coverage, black, isort, flake8 and mypy itself;
+- re-running pytest, coverage, black, isort, flake8 and mypy;
 - comparing all protected files byte for byte against the original repository
   blobs with `cmp`;
 - injecting mutants into the source to check that the tests fail when the
   behaviour is broken (entry 6);
-- reading the code for design issues that tools cannot see, such as interface
+- reviewing the code for design issues that tools cannot see, such as interface
   growth and default arguments bound at definition time (entries 3 and 5).
 
 Entries 1-7 below follow the order in which the work happened. All entries use
@@ -75,7 +75,7 @@ Claude Code. Dates are the project date, 2026-11-07.
 
 **Context:** I wanted the application core (loader, quiz engine, UI, entry point and helpers) built in one delegated task, with quality gates, so that I could review a complete working application.
 
-**AI Tool Used:** Claude Code (orchestrating session delegating to a worker agent)
+**AI Tool Used:** Claude Code (delegating to a worker agent)
 
 **Prompt/Request:** A long structured brief. It named the modules: `utils/file_handler.py`, `data_loader.py`, `quiz_engine.py` (a `QuizMode` abstract base class with `SequentialMode`, `RandomMode` and `AdaptiveMode`, a registry-based factory `create_mode`, and a UI-free `QuizSession`), `ui.py` with injectable I/O and ANSI colours, and a thin `main.py` using argparse. It listed the error cases to handle explicitly (missing file, directory, empty file, invalid JSON with line and column, non-UTF-8 file, missing field naming the card position, duplicate fronts), the quality gates (mypy `--strict`, black, isort, flake8, Python 3.10), the extras (`--limit`, `--seed`, `--history-file`, `--export`), a manual verification list, and an instruction to report ambiguities.
 
@@ -83,7 +83,7 @@ Claude Code. Dates are the project date, 2026-11-07.
 
 **Changes Made:**
 - I accepted all three ambiguity decisions as proposed.
-- The worker had run `isort .` before excluding `.claude/` and silently rewrote four extensionless scripts in `.claude/commands/` (import order only). I found this in the worker's own report, compared every protected file with the original blobs using `cmp`, confirmed exactly four changed files, and restored them byte for byte from the original repository.
+- The worker had run `isort .` before excluding `.claude/` and silently rewrote four extensionless scripts in `.claude/commands/` (import order only). The worker's own report disclosed this. I compared every protected file with the original blobs using `cmp`, confirmed exactly four changed files, and restored them byte for byte from the original repository.
 - `pyproject.toml` now has an isort skip list that excludes `.claude`, `ai_guidance`, `docs` and `venv`.
 
 **Reasoning:** The accepted decisions were sensible defaults and consistent with the specification. The `.claude/` edit was harmless in content but out of scope, and I do not want to rely on "it was only import order": protected paths must stay identical to the originals.
@@ -103,7 +103,7 @@ Claude Code. Dates are the project date, 2026-11-07.
 
 **AI Tool Used:** Claude Code
 
-**Prompt/Request:** This entry is a review, not a generation request: I read `quiz_engine.py` (written by the worker in entry 2) against `ai_guidance/code_review_checklist.md`, as a reviewer rather than the author.
+**Prompt/Request:** This entry is a review, not a generation request: Review of `quiz_engine.py` (written by the worker in entry 2) against `ai_guidance/code_review_checklist.md`, as a reviewer rather than the author.
 
 **AI Response:** Findings of the review. Accepted points: a queue-based `_QueueMode` base keeps `SequentialMode`, `RandomMode` and `AdaptiveMode` very small; `AdaptiveMode` is iterative (no recursion), re-queues a missed card `REINSERT_GAP = 3` positions ahead (or at the end if fewer cards remain) and never re-asks a correct card; the factory registry is case-insensitive and its `ValueError` lists the valid choices. Concerns raised: the worker added an extra abstract method `limit_to()` to the `QuizMode` interface so that `--limit` works, which widens the Strategy interface beyond "select the next card"; and `utils/history.py` imports `SessionStats` from `quiz_engine`, so a helper depends on a domain module.
 
@@ -121,7 +121,7 @@ Claude Code. Dates are the project date, 2026-11-07.
 
 ## 2026-11-07 - Edge case the AI missed: answer equal to an exit word
 
-**Context:** While reading `ui.py` I noticed that any input equal to `exit` or `quit` was treated as a quit command. A card whose correct answer is `exit` could therefore never be answered. None of the bundled decks has such a card, so neither the default tests nor manual runs would ever expose it.
+**Context:** The review of `ui.py` showed that any input equal to `exit` or `quit` was treated as a quit command. A card whose correct answer is `exit` could therefore never be answered. None of the bundled decks has such a card, so neither the default tests nor manual runs would ever expose it.
 
 **AI Tool Used:** Claude Code
 
@@ -274,7 +274,7 @@ Claude Code. Dates are the project date, 2026-11-07.
    The briefs moved from listing prohibitions to stating measurable acceptance criteria, exact names, read-only paths and an explicit "report, do not silently fix" rule (entry 7). The second brief produced no scope violations.
 
 5. **What would you do differently in future AI collaborations?**
-   State the read-only paths and the escalation rule in the very first brief. Ask for a self-review of edge cases (such as inputs that collide with command words) before tests are written. Add a mutation check to the acceptance criteria instead of running it only afterwards. Test interactively in a real terminal, which I did not do for Windows colours.
+   State the read-only paths and the escalation rule in the very first brief. Ask for a self-review of edge cases (such as inputs that collide with command words) before tests are written. Add a mutation check to the acceptance criteria instead of running it only afterwards. Test interactively in a real terminal earlier: I only played a full adaptive session in Windows Terminal at the end (colours, repeated card and summary were correct), and Ctrl+C is still only covered by unit tests.
 
 ## Summary Statistics
 
