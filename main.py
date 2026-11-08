@@ -161,15 +161,35 @@ def _load_history(path: Path | None, ui: QuizUI) -> tuple[dict[str, int], bool]:
 def main(argv: Sequence[str] | None = None) -> int:
     """Run the quizzer.
 
+    Ctrl+C during a question ends the quiz and still shows the summary.
+    Ctrl+C at any other moment (loading, summary, saving) exits quietly.
+
     Args:
         argv: Command-line arguments; defaults to ``sys.argv[1:]``.
 
     Returns:
-        Process exit code: 0 on success, 1 on load or validation errors.
-        Invalid flags make argparse exit with code 2.
+        Process exit code: 0 on success, 1 on load or validation errors,
+        130 when interrupted outside a question. Invalid flags make argparse
+        exit with code 2.
     """
     args = build_parser().parse_args(argv)
     _configure_streams()
+    try:
+        return _run(args)
+    except KeyboardInterrupt:
+        print("\nInterrupted.", file=sys.stderr)
+        return 130
+
+
+def _run(args: argparse.Namespace) -> int:
+    """Load the deck, run the quiz and save or export the results.
+
+    Args:
+        args: Parsed command-line arguments.
+
+    Returns:
+        Process exit code: 0 on success, 1 on load, validation or export errors.
+    """
     try:
         if args.export is not None:
             validate_export_path(args.export)

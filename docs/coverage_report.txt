@@ -4,15 +4,15 @@ rootdir: C:\Dev\Udemy\cd14602-project-starter\project\starter
 configfile: pyproject.toml
 testpaths: tests
 plugins: anyio-4.16.0, platformdirs-4.14.5, cov-7.1.0
-collected 270 items
+collected 271 items
 
-tests\test_exporter.py ...........................                       [ 10%]
+tests\test_exporter.py ...........................                       [  9%]
 tests\test_file_handler.py ....................                          [ 17%]
 tests\test_flashcard_loader.py ......................................... [ 32%]
 ......                                                                   [ 34%]
 tests\test_history.py ..............................                     [ 45%]
 tests\test_integration.py .............................................. [ 62%]
-..........                                                               [ 66%]
+...........                                                              [ 66%]
 tests\test_quiz_modes.py ............................................... [ 84%]
 ..                                                                       [ 84%]
 tests\test_ui.py .........................................               [100%]
@@ -23,7 +23,7 @@ ______________ coverage: platform win32, python 3.12.13-final-0 _______________
 Name                    Stmts   Miss  Cover   Missing
 -----------------------------------------------------
 data_loader.py             57      0   100%
-main.py                    90      0   100%
+main.py                    96      0   100%
 quiz_engine.py            148      0   100%
 ui.py                      85      0   100%
 utils\__init__.py           0      0   100%
@@ -31,6 +31,6 @@ utils\exporter.py          40      0   100%
 utils\file_handler.py      51      0   100%
 utils\history.py           39      0   100%
 -----------------------------------------------------
-TOTAL                     510      0   100%
+TOTAL                     516      0   100%
 Coverage HTML written to dir htmlcov
-============================= 270 passed in 2.50s =============================
+============================= 271 passed in 2.19s =============================

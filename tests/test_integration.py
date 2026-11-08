@@ -176,6 +176,25 @@ def test_keyboard_interrupt_is_handled_like_exit(
     assert "KeyboardInterrupt" not in out + err
 
 
+def test_keyboard_interrupt_outside_a_question_exits_quietly(
+    deck_file: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Ctrl+C while the deck is loading exits with code 130 and no traceback."""
+
+    def interrupt(path: Path) -> None:
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(main_module, "load_flashcards", interrupt)
+
+    code, out, err = run_cli(capsys, "-f", str(deck_file))
+
+    assert code == 130
+    assert "Interrupted." in err
+    assert "Traceback" not in out + err
+
+
 def test_card_whose_answer_is_exit_is_scored_end_to_end(
     tmp_path: Path, feed_input: FeedInput, capsys: pytest.CaptureFixture[str]
 ) -> None:

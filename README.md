@@ -225,6 +225,7 @@ them as formulas.
 | 0 | Quiz finished or stopped early |
 | 1 | Deck could not be loaded, or the export path or export write failed |
 | 2 | Invalid command-line arguments (argparse) |
+| 130 | Ctrl+C pressed outside a question (while loading, printing the summary or saving); prints `Interrupted.` with no traceback |
 
 ## Deck format
 
@@ -296,7 +297,7 @@ starter/
 │   ├── history.py          # Miss-count persistence for adaptive mode
 │   └── exporter.py         # JSON/CSV export of session results
 ├── data/                   # Bundled decks
-├── tests/                  # pytest suite (270 tests)
+├── tests/                  # pytest suite (271 tests)
 ├── docs/
 │   ├── ai_edit_log.md      # Log of AI interactions and reviews
 │   ├── report.md           # Final project report
@@ -373,7 +374,7 @@ this way to show that the factory needs no change
 Run everything from this folder with the virtual environment active.
 
 ```bash
-python -m pytest                                  # run the 270 tests
+python -m pytest                                  # run the 271 tests
 python -m pytest --cov=. --cov-report=html        # coverage, HTML report in htmlcov/
 python -m pytest --cov=. --cov-report=term-missing  # coverage in the terminal
 python -m black --check .                         # formatting (drop --check to apply)
@@ -382,15 +383,20 @@ python -m flake8 .                                # lint
 python -m mypy .                                  # strict type checking
 ```
 
-Current results: 270 tests passed, 100% line coverage (510 statements), and
+Current results: 271 tests passed, 100% line coverage (516 statements), and
 black, isort, flake8 and mypy (`strict = true`) report no issues. The coverage
-output is saved in [docs/coverage_report.txt](docs/coverage_report.txt).
+output is saved in [docs/coverage_report.txt](docs/coverage_report.txt), and a
+screenshot of the HTML report is in [docs/coverage_report.png](docs/coverage_report.png).
 Configuration lives in `pyproject.toml`, `.flake8` and `.coveragerc`.
 
 The tests use only `tmp_path`, `monkeypatch` and `capsys`; none reads the real
 standard input. Ctrl+C and end-of-input handling are covered by unit tests that
 simulate `KeyboardInterrupt` and `EOFError`. I also played a full adaptive session
-by hand in Windows Terminal to check colours, repeated cards and the summary.
+by hand in Windows Terminal to check colours, repeated cards and the summary:
+
+![Adaptive session: questions with coloured feedback](docs/screenshots/adaptive_session_questions.png)
+
+![Adaptive session: summary and per-card table](docs/screenshots/adaptive_session_summary.png)
 
 ## Documentation
 

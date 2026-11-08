@@ -1,7 +1,7 @@
 # AI-Assisted Development Project Report
 
-**Student Name:** Fabio Sabatini
-**Project Title:** Flashcard Quizzer
+**Student Name:** Fabio Sabatini  
+**Project Title:** Flashcard Quizzer  
 **Date:** 2026-11-07
 
 ## Executive Summary
@@ -33,7 +33,7 @@ The application uses only the Python standard library (3.10+). `quiz_engine.py` 
 - [ ] GitHub Copilot, ChatGPT, other (not used)
 
 ### Collaboration Workflow
-1. **Requests.** Each brief stated the goal, modules, explicit error cases, quality gates, read-only paths, and what to report. Tasks were set-up, core and extras, tests, and documentation.
+1. **Requests.** Each brief stated the goal, modules, explicit error cases, quality gates, read-only paths, and what to report.
 2. **Review and validation.** Every output was checked against the review checklist categories (correctness, quality, security, performance, robustness, integration, testability, maintainability). I did not accept worker summaries at face value: I had pytest and all linters re-run, the protected files compared with the originals using `cmp`, and mutants injected.
 3. **Refinement.** Decisions that changed the code went back to a worker as precise instructions.
 
@@ -43,7 +43,7 @@ The application uses only the Python standard library (3.10+). `quiz_engine.py` 
 **Context:** I needed the application core in one task.
 **AI Prompt:** A structured brief: modules, error cases, quality gates, extras, "report ambiguities".
 **AI Response:** Seven modules of about 1,300 lines, two new decks, clean tool output, and three flagged ambiguities (meaning of `--stats`, accuracy counting, the history update rule).
-**Your Changes:** I accepted the ambiguity choices. The worker had also run `isort .` and silently reordered imports in four scripts under `.claude/commands/`. The worker's own report disclosed it. I confirmed it with `cmp`, restored the files byte for byte, and excluded those paths in `pyproject.toml`.
+**Your Changes:** I accepted the ambiguity choices. The worker's `isort .` had also silently reordered imports in four `.claude/commands/` scripts, as its own report disclosed; I confirmed it with `cmp`, restored the originals and excluded those paths.
 **Outcome:** A working application, and a rule: name read-only paths.
 
 #### Example 2: An edge case no default test would find
@@ -54,14 +54,15 @@ The application uses only the Python standard library (3.10+). `quiz_engine.py` 
 **Outcome:** Fixed and protected by tests.
 
 #### Example 3: Tests exposing a design flaw
-**Context:** The worker produced 269 tests; all passed first time.
+**Context:** 269 generated tests, all passing first time.
 **AI Prompt:** Exact test names and scenarios, no real stdin, linter-clean typed tests, and an honest account of first-run failures.
-**AI Response:** It reported that `QuizUI`'s default `input_fn=input` binds the builtin at definition time, so patching `builtins.input` had no effect, and used a fake `sys.stdin` as a workaround.
+**AI Response:** It reported that `QuizUI`'s default `input_fn=input` binds the builtin at definition time, and worked around it with a fake `sys.stdin`.
 **Your Changes:** I asked for the source to be fixed instead: defaults are now `None`, resolved at construction, plus an end-to-end test.
 **Outcome:** A genuinely injectable UI.
 
 ### Challenges with AI Collaboration
-The AI handled happy paths well but missed an unusual input, bound a default argument too early, added a hook to an abstraction, and acted beyond its scope when a tool allowed it.
+The AI handled happy paths well but missed an unusual input, bound a default argument too early, added a hook to an abstraction, and acted beyond its scope when a tool allowed it. My final review also found that Ctrl+C was only handled while a question was waiting; I added a top-level guard and a test.
+
 ## Software Engineering Practices
 
 ### Code Quality Measures
@@ -72,7 +73,7 @@ The AI handled happy paths well but missed an unusual input, bound a default arg
 - [x] Error handling (one exception type per layer)
 
 ### Testing Strategy
-There are 270 tests in seven files: unit tests per module, parametrised edge cases, and integration tests that run whole sessions through `main()` with scripted input, using only `tmp_path`, `monkeypatch` and `capsys`. Line coverage is 100%. Ctrl+C and end-of-input handling are tested with simulated `KeyboardInterrupt` and `EOFError`. I also played a full adaptive session in Windows Terminal with `--stats`: green and red feedback rendered correctly, the missed card returned after three other questions, and the summary showed 9 questions and 88.9% accuracy. Because coverage counts executed lines, not assertions, I also injected two bugs into `quiz_engine.py` (an inverted adaptive re-queue condition, a removed `casefold()`); both were caught. The tests were written after the code.
+There are 271 tests in seven files: unit tests per module, parametrised edge cases, and integration tests that run whole sessions through `main()` with scripted input. Line coverage is 100%. Ctrl+C and end-of-input handling are tested with simulated `KeyboardInterrupt` and `EOFError`. I also played a full adaptive session in Windows Terminal: colours, the repeated card and the summary were correct (screenshots in Appendix B). Because coverage counts executed lines, not assertions, I also injected two bugs into `quiz_engine.py`; both were caught. The tests were written after the code.
 
 ### Design Patterns Used
 - **Strategy:** `QuizMode` and its three subclasses decide the next card; `QuizSession` does not know which one it holds.
@@ -84,8 +85,8 @@ Seven modules with single responsibilities: loading, engine, UI, entry point, an
 ## Technical Challenges and Solutions
 
 ### Challenge 1: Cloning the starter on Windows
-**Problem:** `git clone` failed on Windows because some lesson files have a colon in their name; sparse checkout, `git archive` and a PowerShell attempt also failed.
-**Solution:** A bare clone in a temporary directory, then extraction of only `project/` with `git cat-file blob` per file (21 files).
+**Problem:** `git clone` failed on Windows: some lesson files have a colon in their name.
+**Solution:** A bare clone, then extracting only `project/` with `git cat-file blob`.
 **AI Involvement:** Claude changed approach after each failure.
 **Lessons Learned:** When a tool fails, change the approach, and verify the result.
 
@@ -98,9 +99,9 @@ Seven modules with single responsibilities: loading, engine, UI, entry point, an
 ## Code Quality Analysis
 
 ### Metrics
-- Lines of code: 1,315 in the application and 2,932 in the tests (`wc -l`, including blanks and docstrings)
-- Test coverage: 100% (510 statements, 270 passing tests)
-- Number of functions/classes: 16 classes and 68 functions or methods in the application (Python `ast` count)
+- Lines of code: 1,335 in the application and 2,951 in the tests (`wc -l`, including blanks and docstrings)
+- Test coverage: 100% (516 statements, 271 passing tests)
+- Number of functions/classes: 16 classes and 69 functions or methods in the application (Python `ast` count)
 - Linting score: black, isort, flake8 and mypy (strict) report no issues
 
 ### Self-Assessment
@@ -116,6 +117,9 @@ Strategy and Factory for a real variation point; atomic file writes; strict typi
 
 ### AI Collaboration Skills
 Briefs with measurable acceptance criteria and read-only paths; requiring agents to report, not silently fix; independent verification. Mutation checks test the tests.
+
+### Software Engineering Insights
+A pattern earns its place by isolating a real variation point; I/O at the edges keeps the core testable; coverage is a floor, not proof.
 
 ## Reflection
 
@@ -134,7 +138,7 @@ Precise briefs and honest failure reports let me decide quickly, and verificatio
 
 ## Conclusion
 
-AI-assisted development worked best when I acted as specifier and reviewer. The AI produced about 4,200 lines quickly; the review was only worth something because it included checks that did not rely on the AI's word. I will keep using measurable acceptance criteria, explicit scope rules and mutation checks.
+AI-assisted development worked best when I acted as specifier and reviewer. The AI produced about 4,300 lines quickly; the review was only worth something because it included checks that did not rely on the AI's word. I will keep using measurable acceptance criteria, explicit scope rules and mutation checks.
 
 ## Appendices
 
@@ -142,4 +146,7 @@ AI-assisted development worked best when I acted as specifier and reviewer. The 
 [ai_edit_log.md](ai_edit_log.md) holds seven entries, including the scope violation (2), the exit-word edge case (4) and the late-binding flaw (5).
 
 ### Appendix B: Code Statistics
-See [coverage_report.txt](coverage_report.txt).
+Coverage output: [coverage_report.txt](coverage_report.txt) and [HTML report screenshot](coverage_report.png). Manual session: [questions](screenshots/adaptive_session_questions.png) and [summary](screenshots/adaptive_session_summary.png).
+
+### Appendix C: Additional Resources
+The `ai_guidance/` guides, [design_patterns.md](design_patterns.md), and the pytest, coverage.py and mypy documentation.

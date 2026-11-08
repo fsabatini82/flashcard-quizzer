@@ -41,8 +41,8 @@ I had the results re-verified independently:
 - reviewing the code for design issues that tools cannot see, such as interface
   growth and default arguments bound at definition time (entries 3 and 5).
 
-Entries 1-7 below follow the order in which the work happened. All entries use
-Claude Code. Dates are the project date, 2026-11-07.
+Entries 1-9 below follow the order in which the work happened. All entries use
+Claude Code. Entries 1-7 are from 2026-11-07, entries 8-9 from 2026-11-08.
 
 ---
 
@@ -125,7 +125,7 @@ Claude Code. Dates are the project date, 2026-11-07.
 
 **AI Tool Used:** Claude Code
 
-**Prompt/Request:** In the brief for the test-writing worker I included the exact fix: treat the input as quit only if it is an exit word and does not equal the card's expected answer after `normalize_answer`. I asked for tests for both behaviours and told the worker to report any other bug instead of silently fixing it.
+**Prompt/Request:** In the brief for the test-writing worker I included the exact fix: treat the input as quit only if it is an exit word and does not equal the card's expected answer after `normalize_answer`. I asked for tests for both behaviours and told the worker to report any other bug instead of silently fixing it. Excerpt from the brief: *"Fix: treat the input as an exit command only when it is an exit word AND it does not equal the card's expected answer after quiz_engine.normalize_answer. [...] If while writing tests you find ANY other bug in the source, DO NOT silently fix it [...] report it to me in RESULT with file:line, expected vs actual."*
 
 **AI Response:** The fix was applied in `QuizUI.ask`. To prove that the new tests are able to fail, the worker temporarily removed the second condition; five tests failed (two in `test_integration.py` and three in `test_ui.py`). It then restored the condition.
 
@@ -152,7 +152,7 @@ Claude Code. Dates are the project date, 2026-11-07.
 **AI Response:** 269 tests across seven files with 100% line coverage; all tests passed on the first run. The worker reported the problems it hit and fixed itself: its file-writing tool converted `\uXXXX` escapes into literal non-ASCII characters, which made isort emit a charmap warning and skip four test files (fixed by writing the characters back as escapes); the first lint pass found four black reformatting issues, one flake8 E501 and one mypy `func-returns-value` error on a lambda using `or`; it removed inline imports and an unused `Mapping` import. It also reported a discovery: `QuizUI`'s default `input_fn=input` binds the builtin at definition time, so monkeypatching `builtins.input` had no effect (pytest raised "reading from stdin while output is captured"). The worker worked around it with a `FakeStdin` on `sys.stdin`.
 
 **Changes Made:**
-- I asked the worker to fix the source: `input_fn` and `print_fn` default to `None` and are resolved when the UI is constructed, plus a new end-to-end test, `test_builtins_input_can_be_monkeypatched`. The suite became 270 tests. This is the second of the two post-review modifications, again made by the AI at my direction.
+- I asked the worker to fix the source (follow-up prompt: *"YES fix ui.py:62: make input_fn `Callable[[str], str] | None = None` and resolve builtins `input` at call time [...] then add one end-to-end test that monkeypatches `builtins.input` and drives main([...])"*): `input_fn` and `print_fn` default to `None` and are resolved when the UI is constructed, plus a new end-to-end test, `test_builtins_input_can_be_monkeypatched`. The suite became 270 tests. This is the second of the two post-review modifications, again made by the AI at my direction.
 - I decided that the `--seed` help text should say it only affects random mode.
 - I decided to leave the rejection of the bare `.json` export filename as it is; a test documents it.
 
@@ -211,6 +211,63 @@ Claude Code. Dates are the project date, 2026-11-07.
 
 ---
 
+## 2026-11-08 - Correcting the AI-written documentation
+
+**Context:** A worker agent drafted the README, `docs/architecture.md`, this log and the report. Before publishing, I reviewed the drafts for accuracy and voice.
+
+**AI Tool Used:** Claude Code
+
+**Prompt/Request:** After reading the drafts and playing the app myself, I asked (translated from Italian): *"All files and comments must be in direct form, as if written by me. Ownership must be clear, especially in decisions and reasoning. The tool used for a mechanical or deterministic action is a different matter."* I also asked for the repository URL in the README.
+
+**AI Response:** The drafts were accurate on facts but mixed voices: some passages described the work in the third person ("the orchestrating session"), while others attributed mechanical tool runs to me personally. They also said Windows colours had never been checked in a real terminal, which was true when written but no longer true after my manual session.
+
+**Changes Made:**
+- Goals, decisions and reasoning are now stated in the first person; mechanical actions (running tools, comparing files, injecting mutants) are attributed to Claude Code acting on my instructions. Findings that came out of the AI's review are described as such, not as my own discoveries.
+- The README, report, architecture notes and this log now record my manual adaptive session in Windows Terminal (colours, the repeated card and the summary were correct). Ctrl+C is still described as covered by unit tests, because my session did not exercise it.
+- Added a "Getting the code" section with the repository URL.
+- The worker could not save `docs/report.md` itself (its file-writing tool refused report files) and returned the text instead of working around the block; the text was saved unchanged before these edits.
+
+**Reasoning:** The documents are mine and must state my decisions directly, but they must not claim checks I did not run or discoveries I did not make. The manual test changed a fact, so every place that stated the old fact had to change with it.
+
+**Outcome:** Consistent first-person documents whose factual claims match what was actually done.
+
+**Lessons Learned:**
+- AI-written documentation needs the same review as AI-written code: check every factual claim against what really happened.
+- When a new fact arrives (here, a manual test), search for every place the old fact was stated.
+
+---
+
+## 2026-11-08 - Final review against the assignment checklist
+
+**Context:** Before submitting, I wanted an independent end-to-end review of exactly what the repository contains, against the instructions and the rubric.
+
+**AI Tool Used:** Claude Code, switched to a stronger model (Claude Opus) for this review
+
+**Prompt/Request:** (translated from Italian) *"Now that we are almost at the end, I want a review by Opus. Verify everything we are delivering in the repo. The code works, and we have the screenshots we can attach in the docs, together with the coverage report."*, followed by the full assignment instructions.
+
+**AI Response:** The review started from a fresh clone of the GitHub repository, so it checked what is actually delivered: 270 tests passed, coverage 100%, black, isort, flake8 and mypy clean, all six required test names present. It then reported four findings:
+1. Ctrl+C was handled only while a question was waiting for input. Pressed during deck loading, the summary or the history/export writes, it would end in a traceback, against the requirement to quit gracefully without errors.
+2. The report lacked two sections of the template ("Software Engineering Insights" and "Appendix C: Additional Resources"), and its header lines had no line breaks, so they rendered on a single line on GitHub.
+3. Test, statement and line counts in the README and report were stale after the changes.
+4. The screenshots of my manual session were not in the repository.
+
+**Changes Made:**
+- `main()` now runs the application inside a `KeyboardInterrupt` guard that prints "Interrupted." and returns exit code 130; Ctrl+C during a question still shows the summary and returns 0. New test: `test_keyboard_interrupt_outside_a_question_exits_quietly`.
+- Added the two missing report sections, fixed the header line breaks, and trimmed the report back under 1,500 words.
+- Updated the numbers (271 tests, 516 statements, 100% coverage) and regenerated `docs/coverage_report.txt`.
+- Added the screenshots under `docs/screenshots/` and linked them from the README and the report.
+
+**Reasoning:** The specification says Ctrl+C must quit gracefully, without qualifying when it is pressed, so a guard at the outermost level is the correct fix rather than more local handlers. The template and the word limit are part of the assessment.
+
+**Outcome:** 271 passing tests, 100% coverage, all linters clean, a complete report and screenshots in the repository.
+
+**Lessons Learned:**
+- Tests confirm the behaviour I asked for, not the behaviour the specification asks for; a line-by-line re-read of the specification at the end found a gap that 270 tests had not.
+- Review documentation with the same care as code.
+- Reviewing a fresh clone, not the working folder, verifies what is really delivered.
+
+---
+
 ## Tips for Effective AI Collaboration
 
 ### 1. Be Specific in Your Requests
@@ -265,7 +322,7 @@ Claude Code. Dates are the project date, 2026-11-07.
    Generating a complete, working module set from a structured brief (entry 2) and writing a large test suite to a precise list of names and scenarios (entry 5). Both came back lint-clean and passing. The AI also did well at explaining its own ambiguities and reporting its failures when asked to.
 
 2. **Where did you need to make the most modifications to AI suggestions?**
-   In `ui.py`. Two issues were found after review and both were fixed in that file by the AI at my direction: an answer equal to an exit word was treated as quit (entry 4), and the `input`/`print` defaults were bound at definition time (entry 5). Outside the code, the only correction was restoring four files in `.claude/commands/` that a formatter had changed (entry 2).
+   In `ui.py`, plus the final Ctrl+C guard in `main.py` (entry 9). Two issues were found after review in `ui.py` and both were fixed in that file by the AI at my direction: an answer equal to an exit word was treated as quit (entry 4), and the `input`/`print` defaults were bound at definition time (entry 5). Outside the code, the only correction was restoring four files in `.claude/commands/` that a formatter had changed (entry 2).
 
 3. **What patterns did you notice in AI strengths and weaknesses?**
    Strengths: consistent structure, docstrings and type hints, quality tools passing, and honest reporting when asked. Weaknesses: edge cases that no default test would expose (entry 4), design details such as default arguments bound too early (entry 5), convenience hooks added to an abstraction (`limit_to()`, entry 3), and acting slightly beyond scope when a tool allowed it (entry 2).
@@ -280,9 +337,9 @@ Claude Code. Dates are the project date, 2026-11-07.
 
 Line counts were computed with `wc -l` (physical lines, including blank lines, comments and docstrings).
 
-- **Total AI interactions:** 7 logged (entries 1-7).
-- **Lines of AI-generated code used:** 4,247 Python lines: 1,315 in the application (`main.py`, `data_loader.py`, `quiz_engine.py`, `ui.py`, `utils/*.py`) and 2,932 in the tests (`tests/*.py`). All of the code under review was written by the AI; I did not hand-write any of it. The four bundled decks and the documentation are not counted.
-- **Lines of AI-generated code modified after review:** only two small areas of `ui.py`, both changed by the AI at my direction: the exit-word condition in `QuizUI.ask` (entry 4) and the default-argument resolution for `input_fn` and `print_fn` in `QuizUI.__init__` (entry 5), with their docstrings. Together these are a few lines out of the 1,315 application lines. In both cases I made the decision and the AI made the edit.
+- **Total AI interactions:** 9 logged (entries 1-9).
+- **Lines of AI-generated code used:** 4,286 Python lines: 1,335 in the application (`main.py`, `data_loader.py`, `quiz_engine.py`, `ui.py`, `utils/*.py`) and 2,951 in the tests (`tests/*.py`). All of the code under review was written by the AI; I did not hand-write any of it. The four bundled decks and the documentation are not counted.
+- **Lines of AI-generated code modified after review:** three small areas, all changed by the AI at my direction: the top-level Ctrl+C guard in `main.py` (entry 9) and two areas of `ui.py`: the exit-word condition in `QuizUI.ask` (entry 4) and the default-argument resolution for `input_fn` and `print_fn` in `QuizUI.__init__` (entry 5), with their docstrings. Together these are a few dozen lines out of the 1,335 application lines. In every case I made the decision and the AI made the edit.
 - **Most helpful AI interaction:** The test-suite generation (entry 5): it delivered 270 passing tests and its honest report exposed the late-binding design flaw.
 - **Most challenging AI interaction:** The implementation brief (entry 2): the worker went out of scope with a formatter, and I had to detect and undo it mechanically.
 - **Biggest lesson learned:** Measurable acceptance criteria plus explicit escalation rules ("report, do not silently fix") give better results than prohibitions, and every claim should be verified independently (coverage, protected files) instead of trusted.

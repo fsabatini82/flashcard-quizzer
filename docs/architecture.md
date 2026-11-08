@@ -264,4 +264,6 @@ printing.
   Moving the statistics dataclasses into their own module would remove this.
 - **Ctrl+C not pressed in a real terminal.** Interrupt and end-of-input handling
   are covered by unit tests with simulated `KeyboardInterrupt` and `EOFError`.
+  A top-level guard in `main()` also turns Ctrl+C outside a question into a
+  quiet exit with code 130.
   Colours were checked by hand in Windows Terminal.
