@@ -1,0 +1,16 @@
+[
+  {"front": "SSH", "back": "Secure Shell"},
+  {"front": "TLS", "back": "Transport Layer Security"},
+  {"front": "NGINX", "back": "Engine X"},
+  {"front": "DNS", "back": "Domain Name System"},
+  {"front": "DHCP", "back": "Dynamic Host Configuration Protocol"},
+  {"front": "NFS", "back": "Network File System"},
+  {"front": "RAID", "back": "Redundant Array of Independent Disks"},
+  {"front": "SNMP", "back": "Simple Network Management Protocol"},
+  {"front": "LDAP", "back": "Lightweight Directory Access Protocol"},
+  {"front": "CIDR", "back": "Classless Inter-Domain Routing"},
+  {"front": "NAT", "back": "Network Address Translation"},
+  {"front": "SFTP", "back": "SSH File Transfer Protocol"},
+  {"front": "SMTP", "back": "Simple Mail Transfer Protocol"},
+  {"front": "IaC", "back": "Infrastructure as Code"}
+]

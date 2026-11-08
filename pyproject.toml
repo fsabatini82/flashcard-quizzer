@@ -1,0 +1,18 @@
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+extend-exclude = "venv"
+
+[tool.isort]
+profile = "black"
+line_length = 88
+skip = ["venv", ".claude", "ai_guidance", "docs"]
+
+[tool.mypy]
+strict = true
+python_version = "3.10"
+exclude = ["venv/"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

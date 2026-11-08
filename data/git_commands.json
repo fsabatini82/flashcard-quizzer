@@ -1,0 +1,17 @@
+{
+  "cards": [
+    {"front": "Which command creates a new local repository?", "back": "git init"},
+    {"front": "Which command copies a remote repository to your machine?", "back": "git clone"},
+    {"front": "Which command shows modified and staged files?", "back": "git status"},
+    {"front": "Which command stages all changes in the current directory?", "back": "git add ."},
+    {"front": "Which command records staged changes as a snapshot?", "back": "git commit"},
+    {"front": "Which command lists the commit history?", "back": "git log"},
+    {"front": "Which command lists local branches?", "back": "git branch"},
+    {"front": "Which command switches to an existing branch named dev?", "back": "git switch dev"},
+    {"front": "Which command merges the branch dev into the current branch?", "back": "git merge dev"},
+    {"front": "Which command downloads remote changes without merging them?", "back": "git fetch"},
+    {"front": "Which command fetches and merges remote changes?", "back": "git pull"},
+    {"front": "Which command uploads local commits to the remote?", "back": "git push"},
+    {"front": "Which command temporarily shelves uncommitted changes?", "back": "git stash"}
+  ]
+}
