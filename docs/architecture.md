@@ -252,6 +252,12 @@ user-facing message. `main.py` catches them at the boundary and prints one
 line, so no traceback reaches the user and the lower layers stay free of
 printing.
 
+**Why Ctrl+C is handled at two levels.** During a question, `QuizUI.ask` turns
+Ctrl+C into a normal early exit, so the summary is still shown (exit code 0).
+At any other moment (loading, summary, saving), a guard around the whole run in
+`main()` prints `Interrupted.` and exits with code 130, so no traceback can
+reach the user.
+
 ### Known trade-offs
 
 - **`limit_to()` widens the Strategy interface.** `--limit` needed a way to
@@ -262,8 +268,3 @@ printing.
   `utils/exporter.py` import `SessionStats` / `AnswerRecord` from
   `quiz_engine`, so the "utils" package is not independent of the domain.
   Moving the statistics dataclasses into their own module would remove this.
-- **Ctrl+C not pressed in a real terminal.** Interrupt and end-of-input handling
-  are covered by unit tests with simulated `KeyboardInterrupt` and `EOFError`.
-  A top-level guard in `main()` also turns Ctrl+C outside a question into a
-  quiet exit with code 130.
-  Colours were checked by hand in Windows Terminal.

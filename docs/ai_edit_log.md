@@ -223,7 +223,7 @@ Claude Code. Entries 1-7 are from 2026-11-07, entries 8-9 from 2026-11-08.
 
 **Changes Made:**
 - Goals, decisions and reasoning are now stated in the first person; mechanical actions (running tools, comparing files, injecting mutants) are attributed to Claude Code acting on my instructions. Findings that came out of the AI's review are described as such, not as my own discoveries.
-- The README, report, architecture notes and this log now record my manual adaptive session in Windows Terminal (colours, the repeated card and the summary were correct). Ctrl+C is still described as covered by unit tests, because my session did not exercise it.
+- The README, report, architecture notes and this log now record my manual adaptive session in Windows Terminal (colours, the repeated card and the summary were correct). I later pressed Ctrl+C by hand as well, and it stopped the quiz cleanly; the documents record that too.
 - Added a "Getting the code" section with the repository URL.
 - The worker could not save `docs/report.md` itself (its file-writing tool refused report files) and returned the text instead of working around the block; the text was saved unchanged before these edits.
 
@@ -331,7 +331,7 @@ Claude Code. Entries 1-7 are from 2026-11-07, entries 8-9 from 2026-11-08.
    The briefs moved from listing prohibitions to stating measurable acceptance criteria, exact names, read-only paths and an explicit "report, do not silently fix" rule (entry 7). The second brief produced no scope violations.
 
 5. **What would you do differently in future AI collaborations?**
-   State the read-only paths and the escalation rule in the very first brief. Ask for a self-review of edge cases (such as inputs that collide with command words) before tests are written. Add a mutation check to the acceptance criteria instead of running it only afterwards. Test interactively in a real terminal earlier: I only played a full adaptive session in Windows Terminal at the end (colours, repeated card and summary were correct), and Ctrl+C is still only covered by unit tests.
+   State the read-only paths and the escalation rule in the very first brief. Ask for a self-review of edge cases (such as inputs that collide with command words) before tests are written. Add a mutation check to the acceptance criteria instead of running it only afterwards. Test interactively in a real terminal earlier: I only played a full adaptive session in Windows Terminal at the end (colours, repeated card, summary and Ctrl+C were correct).
 
 ## Summary Statistics
 

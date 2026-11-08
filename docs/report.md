@@ -73,7 +73,7 @@ The AI handled happy paths well but missed an unusual input, bound a default arg
 - [x] Error handling (one exception type per layer)
 
 ### Testing Strategy
-There are 271 tests in seven files: unit tests per module, parametrised edge cases, and integration tests that run whole sessions through `main()` with scripted input. Line coverage is 100%. Ctrl+C and end-of-input handling are tested with simulated `KeyboardInterrupt` and `EOFError`. I also played a full adaptive session in Windows Terminal: colours, the repeated card and the summary were correct (screenshots in Appendix B). Because coverage counts executed lines, not assertions, I also injected two bugs into `quiz_engine.py`; both were caught. The tests were written after the code.
+There are 271 tests in seven files: unit tests per module, parametrised edge cases, and integration tests that run whole sessions through `main()` with scripted input. Line coverage is 100%. Ctrl+C and end-of-input handling are tested with simulated `KeyboardInterrupt` and `EOFError`. I also played a full adaptive session in Windows Terminal: colours, the repeated card, the summary and Ctrl+C pressed by hand were correct (screenshots in Appendix B). Because coverage counts executed lines, not assertions, I also injected two bugs into `quiz_engine.py`; both were caught. The tests were written after the code.
 
 ### Design Patterns Used
 - **Strategy:** `QuizMode` and its three subclasses decide the next card; `QuizSession` does not know which one it holds.
@@ -129,7 +129,6 @@ Precise briefs and honest failure reports let me decide quickly, and verificatio
 ### What Could Be Improved
 - State read-only paths and escalation rules in the first brief.
 - Request an edge-case self-review before tests are written.
-- Ctrl+C and `exit` were verified with simulated interrupts, not by pressing the keys in a terminal.
 - A `LimitedMode` decorator would shrink the Strategy interface.
 
 ### Future Enhancements

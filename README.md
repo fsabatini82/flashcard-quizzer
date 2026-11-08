@@ -392,7 +392,7 @@ Configuration lives in `pyproject.toml`, `.flake8` and `.coveragerc`.
 The tests use only `tmp_path`, `monkeypatch` and `capsys`; none reads the real
 standard input. Ctrl+C and end-of-input handling are covered by unit tests that
 simulate `KeyboardInterrupt` and `EOFError`. I also played a full adaptive session
-by hand in Windows Terminal to check colours, repeated cards and the summary:
+by hand in Windows Terminal to check colours, repeated cards, the summary and Ctrl+C:
 
 ![Adaptive session: questions with coloured feedback](docs/screenshots/adaptive_session_questions.png)
 
